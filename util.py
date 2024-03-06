@@ -9,7 +9,6 @@ import git
 
 # embeddings = HuggingFaceHubEmbeddings(model="thuan9889/llama_embedding_model_v1")
 from chromadb.utils import embedding_functions
-os.environ['GOOGLE_API_KEY'] = "AIzaSyCS1bV6_bfizb1tAcQEB9BvCTtqCCLlGFo"
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=os.environ['GOOGLE_API_KEY'], task_type="retrieval_query")
 
 model = ChatGoogleGenerativeAI(model="gemini-pro",google_api_key=os.environ['GOOGLE_API_KEY'],temperature=0.2,convert_system_message_to_human=True)
