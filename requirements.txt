@@ -1,0 +1,6 @@
+langchain
+langchain_community
+google_generativeai
+sentence_transformers
+chromadb
+langchain_google_genai
