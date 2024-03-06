@@ -50,17 +50,14 @@ texts = text_splitter.split_text(context)
 
 vector_index = Chroma.from_texts(texts, embeddings).as_retriever(search_kwargs={"k":5})
 
-# import shutil
-# shutil.rmtree('githubCode')
-# print("Directory removed!!")
 qa_chain = RetrievalQA.from_chain_type(
     model,
     retriever=vector_index,
     return_source_documents=True
 )
-
+    
 # Function to generate assistant's response using ask function
-def generate_assistant_response(question):
+def ask(question):
     answer = qa_chain({"query": question})
     print(answer)
     return answer['result']

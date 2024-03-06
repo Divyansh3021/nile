@@ -19,24 +19,7 @@ def clone_repo(repo):
         
 if btn and not flag:
     clone_repo(repo=repo)
-    # if os.path.exists("githubCode") and os.path.isdir("githubCode"):
-    #     print("File already exists!!")
-    #     pass
-    # else:
-    #     git.Repo.clone_from(repo,"githubCode")
     flag = True
-
-# def response_generator():
-#     response = random.choice(
-#         [
-#             "Hello there! How can I assist you today?",
-#             "Hi, human! Is there anything I can help you with?",
-#             "Do you need help?",
-#         ]
-#     )
-#     for word in response.split():
-#         yield word + " "
-#         time.sleep(0.05)
 
 st.title("Nile")
 
@@ -51,7 +34,7 @@ for message in st.session_state.messages:
 
 # Accept user input
 if prompt := st.chat_input("What's your question ?"):
-    from util import generate_assistant_response
+    from util import ask
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
     # Display user message in chat message container
@@ -60,16 +43,15 @@ if prompt := st.chat_input("What's your question ?"):
 
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
-
         try:
-            response = generate_assistant_response(prompt)
+            response = ask(prompt)
         except InternalServerError as err:
             retry_attempts = 0
             MAX_RETRIES = 2
             if retry_attempts < MAX_RETRIES:
                 retry_attempts += 1
                 time.sleep(2)
-                response = generate_assistant_response(prompt)
+                response = ask(prompt)
             else:
                 # If retries are exhausted, log the error for further investigation
                 response = "500 An internal error has occurred. Please retry or report in https://developers.generativeai.google/guide/troubleshooting"
