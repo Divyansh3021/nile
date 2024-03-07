@@ -2,17 +2,28 @@ import streamlit as st
 import random
 import time
 import git
-import os
+import os, shutil, stat
 from google.api_core.exceptions import InternalServerError
 
 flag = False
 repo = st.text_input(label="Paste the .git link of repository.")
 btn = st.button(label="Submit")
 
+def rm_dir_readonly(func, path, _):
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+
 def clone_repo(repo):
     if os.path.exists("githubCode") and os.path.isdir("githubCode"):
         print("File already exists!!")
-        pass
+        # shutil.rmtree('githubCode', onerror=rm_dir_readonly)
+        # print("cleaning and cloning repo")
+        # git.Repo.clone_from(repo,"githubCode")
+
+        with open("Code.txt", "r+", encoding="utf-8") as output:
+            output.truncate(0)    
+            output.seek(0)
     else:
         print("Cloning repo!!")
         git.Repo.clone_from(repo,"githubCode")
@@ -22,6 +33,10 @@ if btn and not flag:
     flag = True
 
 st.title("Nile")
+
+if flag:
+    from get_stack import techStack
+    st.markdown(techStack)
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -34,8 +49,10 @@ for message in st.session_state.messages:
 
 # Accept user input
 if prompt := st.chat_input("What's your question ?"):
-    from util import ask
+    from util import ask, techStack
+    techStack = True
     # Add user message to chat history
+    st.markdown(techStack)
     st.session_state.messages.append({"role": "user", "content": prompt})
     # Display user message in chat message container
     with st.chat_message("user"):

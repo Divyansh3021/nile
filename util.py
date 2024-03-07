@@ -4,14 +4,15 @@ from langchain_community.embeddings import HuggingFaceHubEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-
-import git 
+import google.generativeai as genai
 
 # embeddings = HuggingFaceHubEmbeddings(model="thuan9889/llama_embedding_model_v1")
 from chromadb.utils import embedding_functions
-embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=os.environ['GOOGLE_API_KEY'], task_type="retrieval_query")
+embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=os.environ['GOOGLE_API_KEY'], task_type="retrieval_document")
 
 model = ChatGoogleGenerativeAI(model="gemini-pro",google_api_key=os.environ['GOOGLE_API_KEY'],temperature=0.2,convert_system_message_to_human=True)
+
+llm = genai.GenerativeModel('gemini-pro')
 
 def get_folder_paths(directory = "githubCode"):
     folder_paths = []
@@ -27,12 +28,16 @@ directory_paths = get_folder_paths()
 directory_paths.append("Code")
 print("directory_paths: ", directory_paths)
 
-with open("Code.txt", "w", encoding='utf-8') as output:
+files = []
+with open("Code.txt", "r+", encoding='utf-8') as output:
+    output.truncate(0)
+    output.seek(0)
     for directory_path in directory_paths:
         for filename in os.listdir(directory_path):
-            if filename.endswith((".py",".ipynb",".js", ".ts")):
+            if filename.endswith((".py",".js", ".ts")):
                 filepath = os.path.join(directory_path, filename)
                 with open(filepath, "r", encoding='utf-8') as file:
+                    files.append(filepath)
                     code = file.read()
                     output.write(f"Filepath: {filepath}:\n\n")
                     output.write(code + "\n\n")
@@ -44,11 +49,11 @@ loader = TextLoader("Code.txt", encoding="utf-8")
 pages = loader.load_and_split()
 
 # Split data into chunks
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=4000, chunk_overlap=200)
 context = "\n\n".join(str(p.page_content) for p in pages)
 texts = text_splitter.split_text(context)
 
-vector_index = Chroma.from_texts(texts, embeddings).as_retriever(search_kwargs={"k":5})
+vector_index = Chroma.from_texts(texts, embeddings).as_retriever(search_kwargs={"k":3})
 
 qa_chain = RetrievalQA.from_chain_type(
     model,
@@ -62,4 +67,5 @@ def ask(question):
     print(answer)
     return answer['result']
 
-# print(generate_assistant_response("Tell me about the instructor_embeddings function."))
+
+# print(techStack)
